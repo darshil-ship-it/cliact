@@ -1,0 +1,15 @@
+'use client';
+import Link from 'next/link';
+import { useState } from 'react';
+import { ArrowUpRight } from 'lucide-react';
+import { Content, Entry, text, strings } from '@/types/cms';
+import { mediaUrl } from '@/lib/validators';
+import { LeadForm } from '@/components/forms/lead-form';
+export function ArticleArt({ entry, large = false }: {
+    entry: Entry;
+    large?: boolean;
+}) { const url = mediaUrl(text(entry.data, 'cover_image_url')); return url ? <img className={`article-art ${large ? 'large' : ''}`} src={url} alt={entry.title} width={900} height={600} loading="lazy"/> : <div className={`article-art editorial-art ${large ? 'large' : ''}`}><span className="art-word">more<br /><i>human.</i></span><span className="art-caption">THE CLIACT JOURNAL / {text(entry.data, 'category').toUpperCase()}</span></div>; }
+export function BlogGrid({ data, items }: {
+    data: Content;
+    items: Entry[];
+}) { const [category, setCategory] = useState('All stories'); const categories = ['All stories', ...new Set(items.map(r => text(r.data, 'category')))]; const featured = items.find(i => i.data.featured) ?? items[0]; const filtered = items.filter(i => category === 'All stories' || text(i.data, 'category') === category); return <div className="journal"><div className="journal-heading"><span className="eyebrow">{text(data, 'eyebrow')}</span><h1>{text(data, 'heading')}</h1><p>{text(data, 'description')}</p></div>{featured && category === 'All stories' && <Link href={`/resources/blog/${featured.slug}`} className="featured-article"><ArticleArt entry={featured} large/><div><span className="eyebrow">FEATURED STORY / {text(featured.data, 'category')}</span><h2>{featured.title}</h2><p>{text(featured.data, 'excerpt')}</p><span className="text-link">Take a moment to read <ArrowUpRight size={17}/></span>{featured.data.sample && <span className="sample-label">SAMPLE EDITORIAL</span>}</div></Link>}<div className="journal-divider"><h2>Fresh perspectives.</h2><span>THE LATEST FROM CLIACT</span></div><div className="filter-pills">{categories.map(c => <button key={c} className={c === category ? 'active' : ''} onClick={() => setCategory(c)} aria-pressed={c === category}>{c}</button>)}</div><div className="article-grid">{filtered.map(entry => <Link href={`/resources/blog/${entry.slug}`} key={entry.id} className="article-card"><ArticleArt entry={entry}/><span className="eyebrow">{text(entry.data, 'category')}</span><h3>{entry.title}</h3><p>{text(entry.data, 'excerpt')}</p><span className="article-date">{text(entry.data, 'published_date')} <ArrowUpRight size={16}/></span></Link>)}</div><div className="popular-topics"><h3>Popular topics</h3>{[...new Set(items.flatMap(i => strings(i.data, 'tags')))].map(tag => <span className="topic-tag" key={tag}>{tag}</span>)}</div><div className="newsletter"><div><span className="eyebrow">A NOTE FROM CLIACT</span><h2>{text(data,'newsletter_heading','A little perspective for your inbox.')}</h2><p>{text(data,'newsletter_description','Updates on thoughtful technology and the future of care.')}</p></div><LeadForm type="newsletter" compact/></div></div>; }

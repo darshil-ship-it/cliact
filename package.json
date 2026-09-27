@@ -1,0 +1,46 @@
+{
+  "name": "nexact-health",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/run-ts.cjs tests/core.test.ts",
+    "seed": "node scripts/run-ts.cjs scripts/seed.ts",
+    "test:integration": "node scripts/run-ts.cjs scripts/check-local.ts",
+    "test:routes": "node scripts/run-ts.cjs scripts/check-routes.ts",
+    "test:production": "node scripts/run-ts.cjs scripts/check-production.ts"
+  },
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "@supabase/ssr": "latest",
+    "@supabase/supabase-js": "latest",
+    "framer-motion": "latest",
+    "lucide-react": "latest",
+    "zod": "latest",
+    "react-hook-form": "latest",
+    "@hookform/resolvers": "latest",
+    "react-markdown": "latest",
+    "remark-gfm": "latest",
+    "@dnd-kit/core": "latest",
+    "@dnd-kit/sortable": "latest",
+    "@dnd-kit/utilities": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "tailwindcss": "latest",
+    "@tailwindcss/postcss": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "tsx": "latest",
+    "@playwright/test": "latest"
+  }
+}

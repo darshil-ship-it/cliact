@@ -1,0 +1,18 @@
+'use client';
+import Link from 'next/link';
+import { useState, useId } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { ArrowUpRight, FileText, ClipboardList, Activity, MessageSquare, RefreshCw, Calendar, ChartNoAxesCombined, ArrowRight } from 'lucide-react';
+import { Content, text, list } from '@/types/cms';
+import { contentMediaUrl, safeUrl } from '@/lib/validators';
+import { Media } from './media';
+import { ContentIcon } from '@/components/ui/content-icon';
+const icons = [FileText, ClipboardList, Activity, MessageSquare, RefreshCw, Calendar, ChartNoAxesCombined];
+export function HeroSection({ data }: {
+    data: Content;
+}) { const heroId = useId(); const items = list(data, 'items'); const [selected, setSelected] = useState(0); const reduced = useReducedMotion(); const active = items[selected] ?? data; return <motion.section className="hero" initial={reduced||data.animation==='none'?false:{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:.5}}><div className="container hero-grid"><div className="hero-content"><div className="eyebrow"><span className="eyebrow-symbol"></span>{text(data, 'eyebrow')}</div><h1>{text(data, 'heading').split('\n').map((l, i) => <span key={i} className={i === 1 ? 'muted-heading' : ''}>{l}{i === 0 && <br />}</span>)}</h1><p className="hero-description">{text(data, 'description')}</p><div className="button-row"><Link className="button button-primary" href={safeUrl(text(data, 'button_primary_url', '/book-demo'))}>{text(data, 'button_primary', 'Book a Demo')}<ArrowUpRight size={17}/></Link><Link className="button button-outline" href={safeUrl(text(data, 'button_secondary_url', '/connect'))}>{text(data, 'button_secondary', 'Connect to Team')}<ArrowRight size={16}/></Link></div>{items.length > 0 && <div className="hero-support"><h2>{text(data, 'support_heading', 'How can AI support you?')}</h2><div className="use-case-pills" role="tablist" aria-label="AI support use cases">{items.map((item, i) => { const Icon = icons[i % icons.length]; return <button role="tab" key={i} id={`${heroId}-tab-${i}`} aria-selected={selected === i} aria-controls={`${heroId}-media`} onClick={() => setSelected(i)} onKeyDown={e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    const n = (i + (e.key === 'ArrowRight' ? 1 : -1) + items.length) % items.length;
+    setSelected(n);
+    document.getElementById(`${heroId}-tab-${n}`)?.focus();
+} }} tabIndex={selected === i ? 0 : -1} className={`use-case-pill ${selected === i ? 'selected' : ''}`}>{text(item,'icon')?<ContentIcon name={text(item,'icon')} size={14}/>:<Icon size={14}/>} {text(item, 'title')}</button>; })}</div></div>}</div><div className="hero-visual"><div className="hero-orbit" aria-hidden="true"/><div className="hero-media-caption"><span className="mini-cross"></span> YOUR DAY, WITH A LITTLE MORE FLOW</div><AnimatePresence mode="wait"><motion.div role="tabpanel" id={`${heroId}-media`} aria-labelledby={`${heroId}-tab-${selected}`} key={selected} initial={reduced ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: .22 }}><Media data={contentMediaUrl(active)?{...data,...active}:data} mode={text(active, 'title', 'Write progress notes')} priority/></motion.div></AnimatePresence><p className="hero-visual-description">{text(active, 'description', 'Thoughtful support. A clinician always in control.')}</p></div></div><div className="container hero-bottom"><span>LESS BUSYWORK. MORE POSSIBILITY.</span><div>Built around clinicians <span>·</span> Designed for real workflows <span>·</span> Human oversight, always</div></div></motion.section>; }

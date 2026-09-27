@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createSeed } from '../lib/demo/seed';
+import { entrySchema, leadSchema, safeUrl, mediaUrl, contentMediaUrl, safeThemeValue, createEntrySchema, updateEntrySchema, mutationSchema } from '../lib/validators';
+test('all seeded CMS records validate and all section parents exist', () => { const db = createSeed(); const ids = new Set<string>(); for (const [table, rows] of Object.entries(db)) {
+    for (const row of rows) {
+        assert.ok(entrySchema.safeParse(row).success, `${table}: ${row.title}`);
+        assert.ok(!ids.has(row.id));
+        ids.add(row.id);
+        if (table === 'page_sections')
+            assert.ok(db.pages.some(p => p.id === row.page_id));
+    }
+} });
+test('locked homepage sections and global reach placement', () => { const db = createSeed(); const home = db.pages.find(p => p.slug === '/')!; assert.deepEqual(db.page_sections.filter(s => s.page_id === home.id).map(s => s.section_type), ['HeroSection', 'Testimonials', 'MediaSplitSection', 'ProductShowcase', 'FeatureGrid', 'MediaSplitSection', 'SecurityGrid', 'Testimonials', 'GlobalReachSection', 'ProductShowcase', 'CTASection']); });
+test('unverified endorsements and numeric claims are absent from seed', () => { const db = createSeed(); assert.ok(db.testimonials.every(t => t.data.sample === true)); assert.ok(db.pricing_plans.every(p => p.data.monthly_price === null)); assert.equal(db.compliance_badges.length, 0); assert.ok(db.organization_content.every(p => p.data.available === false)); });
+test('unsafe URL schemes and theme injection are rejected', () => { assert.equal(safeUrl('javascript:alert(1)'), ''); assert.equal(safeUrl('//malicious.test'), ''); assert.equal(mediaUrl('data:image/svg+xml,test'), ''); assert.equal(safeThemeValue('primary', 'red;position:fixed'), undefined); assert.equal(safeThemeValue('primary', '#2463eb'), '#2463eb'); assert.equal(safeUrl('/book-demo'), '/book-demo'); });
+test('CMS media resolver supports every primary public image field', () => { const url = 'https://example.com/clinic.jpg'; for (const key of ['media_url', 'image_url', 'video_url', 'cover_image_url']) assert.equal(contentMediaUrl({ [key]: url }), url); assert.equal(contentMediaUrl({ media_url: 'javascript:alert(1)', image_url: url }), url); assert.equal(contentMediaUrl({ poster_url: url }), ''); });
+test('leads require consent, valid email, and demo details', () => { const base = { type: 'demo', name: 'Sample Tester', email: 'sample@example.com', consent: true, company: 'Demo clinic', role: 'Manager', specialty: 'Physiotherapy', team_size: '2–10', country: 'Test country' }; assert.ok(leadSchema.safeParse(base).success); assert.ok(!leadSchema.safeParse({ ...base, consent: false }).success); assert.ok(!leadSchema.safeParse({ ...base, email: 'invalid' }).success); assert.ok(!leadSchema.safeParse({ ...base, company: '' }).success); assert.ok(!leadSchema.safeParse({ ...base, type: 'contact', message: '' }).success); });
+test('editable CMS schemas strip database timestamps', () => { const row = { id: crypto.randomUUID(), title: 'Editable record', slug: 'editable-record', status: 'published' as const, enabled: true, sort_order: 1, data: { heading: 'Editable' }, created_at: '', updated_at: '' }; for (const schema of [createEntrySchema, updateEntrySchema]) { const parsed = schema.parse(row); assert.equal('created_at' in parsed, false); assert.equal('updated_at' in parsed, false); } const mutation = mutationSchema.parse({ table: 'page_sections', action: 'save', record: { ...row, page_id: crypto.randomUUID(), section_type: 'HeroSection' } }); assert.ok(mutation.record); assert.equal('created_at' in mutation.record!, false); assert.equal('updated_at' in mutation.record!, false); });
+test('database read schema accepts Supabase timestamp offsets', () => { const row = { id: crypto.randomUUID(), title: 'Read record', slug: 'read-record', status: 'published' as const, enabled: true, sort_order: 1, data: {}, created_at: '2026-09-25T12:34:56.123456+00:00', updated_at: '2026-09-25T12:34:56+00:00' }; assert.ok(entrySchema.safeParse(row).success); });

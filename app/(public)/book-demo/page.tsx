@@ -1,0 +1,5 @@
+import { getDatabase } from '@/lib/data';
+import { LeadForm } from '@/components/forms/lead-form';
+import { Check } from 'lucide-react';
+export const metadata = { title: 'Book a Demo', description: 'Explore a more connected working day with Cliact Health.' };
+export default async function Demo() { const db = await getDatabase(); return <div className="container conversion-page"><div className="conversion-intro"><span className="eyebrow">LET’S MAKE ROOM FOR CARE</span><h1>Your next chapter<br />starts with a hello.</h1><p>Tell us about your team. We’ll explore what a more connected working day could look like.</p><ul>{['A conversation around your workflows', 'A closer look at the Cliact experience', 'Room for all your questions'].map(i => <li key={i}><Check size={18}/>{i}</li>)}</ul><div className="conversion-quote">“More presence.<br /><span>Less paperwork.</span>”</div></div><div className="form-card"><span className="eyebrow">MEET CLIACT</span><h2>Book a Demo</h2><p>A little context helps us make it useful.</p><LeadForm type="demo" specialties={db.specialties.map(s => s.title)}/></div></div>; }

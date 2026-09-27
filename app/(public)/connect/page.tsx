@@ -1,0 +1,3 @@
+import { LeadForm } from '@/components/forms/lead-form';
+export const metadata = { title: 'Connect to Team', description: 'Start a conversation with Cliact Health.' };
+export default function Connect() { return <div className="container conversion-page"><div className="conversion-intro"><span className="eyebrow">GOOD THINGS START WITH A CONVERSATION</span><h1>Let’s see what’s<br />possible, together.</h1><p>A question, a partnership, or a new idea. We’d love to hear what’s on your mind.</p><div className="conversion-quote">Thoughtful technology.<br /><span>Human connections.</span></div></div><div className="form-card"><span className="eyebrow">SAY HELLO</span><h2>Connect to Team</h2><p>Tell us how we can help.</p><LeadForm type="contact"/></div></div>; }
